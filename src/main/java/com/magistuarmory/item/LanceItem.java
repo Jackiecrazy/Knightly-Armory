@@ -4,21 +4,13 @@ import com.magistuarmory.event.ClientEventHandler;
 import com.magistuarmory.network.PacketHandler;
 import com.magistuarmory.network.PacketLanceCollision;
 import java.util.List;
-import javax.annotation.Nullable;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.passive.horse.HorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.IItemTier;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemModelsProperties;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.item.Items;
-import net.minecraft.item.UseAction;
+import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
@@ -36,33 +28,33 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 
-public class LanceItem extends MedievalWeaponItem implements IHasModelProperty
+public class LanceItem extends MedievalWeaponItem implements IHasModelProperty, IDyeableArmorItem
 {
     public boolean attacking = false;
     public double velocityProjection = 0.0D;
     private int clickedTicks = 0;
 
-    public LanceItem(String unlocName, Item.Properties build, IItemTier material, float attackDamage, float materialFactor, float attackSpeed, int armorPiercing, float reachDistance)
+    public LanceItem(Item.Properties build, IItemTier material, float baseAttackDamage, float baseAttackSpeed, int armorPiercing, float reachDistance, float weight)
     {
-        super(unlocName, build, material, attackDamage, materialFactor, attackSpeed, armorPiercing, reachDistance);
+        super(build, material, baseAttackDamage, baseAttackSpeed, armorPiercing, reachDistance, weight);
     }
 
     @Override
-    public @NotNull ActionResult<ItemStack> use(World p_41432_, PlayerEntity p_41433_, @NotNull Hand p_41434_)
+    public @NotNull ActionResult<ItemStack> use(@NotNull World p_41432_, @NotNull PlayerEntity p_41433_, @NotNull Hand p_41434_)
     {
-        setRaised((LivingEntity)p_41433_, !isRaised((LivingEntity)p_41433_));
+        setRaised(p_41433_, !isRaised(p_41433_));
 
         return super.use(p_41432_, p_41433_, p_41434_);
     }
 
     @Override
-    public @NotNull UseAction getUseAnimation(ItemStack par1ItemStack)
+    public @NotNull UseAction getUseAnimation(@NotNull ItemStack par1ItemStack)
     {
         return UseAction.BOW;
     }
 
     @Override
-    public void inventoryTick(ItemStack par1ItemStack, World world, Entity entity, int par4, boolean par5)
+    public void inventoryTick(@NotNull ItemStack par1ItemStack, @NotNull World world, @NotNull Entity entity, int par4, boolean par5)
     {
         if (entity != null && entity instanceof PlayerEntity)
         {
@@ -176,7 +168,7 @@ public class LanceItem extends MedievalWeaponItem implements IHasModelProperty
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable World level, List<ITextComponent> tooltip, ITooltipFlag flagIn)
+    public void appendHoverText(@NotNull ItemStack stack, World level, List<ITextComponent> tooltip, @NotNull ITooltipFlag flagIn)
     {
         tooltip.add((new TranslationTextComponent("lance.rideronly")).withStyle(TextFormatting.BLUE));
         tooltip.add((new TranslationTextComponent("lance.leftclick")).withStyle(TextFormatting.BLUE));
@@ -259,7 +251,7 @@ public class LanceItem extends MedievalWeaponItem implements IHasModelProperty
         }
     }
 
-    public boolean isRaised(@Nullable LivingEntity entityIn)
+    public boolean isRaised(LivingEntity entityIn)
     {
         if (entityIn == null)
         {
@@ -301,5 +293,17 @@ public class LanceItem extends MedievalWeaponItem implements IHasModelProperty
     public void registerModelProperty()
     {
         ItemModelsProperties.register((Item)this, new ResourceLocation("magistuarmory", "raised"), (stack, world, entity) -> isRaised(entity) ? 1.0F : 0.0F);
+    }
+
+    @Override
+    public int getColor(ItemStack p_200886_1_)
+    {
+        CompoundNBT compoundnbt = p_200886_1_.getTagElement("display");
+        return compoundnbt != null && compoundnbt.contains("color", 99) ? compoundnbt.getInt("color") : -10092544;
+    }
+
+    public boolean isSilver()
+    {
+        return isSilver;
     }
 }
